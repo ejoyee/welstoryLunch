@@ -495,10 +495,10 @@ def run_schedule():
 
 def main():
 
-    job()
+    # 테스트용 즉시 발송 메소드 호출
+    # job()
 
-    # 평일 오전 11:00 자동 전송
-    # schedule.every(10).seconds.do(job)
+    # 평일 오전 12:00 자동 전송
     schedule.every().monday.at("12:00").do(job)
     schedule.every().tuesday.at("12:00").do(job)
     schedule.every().wednesday.at("12:00").do(job)
@@ -511,6 +511,7 @@ def main():
 if __name__ == "__main__":
     main()
 
+# 테스트 코드
 # if __name__ == "__main__":
 #     now = get_current_seoul_time()
 #     send_to_mattermost(f"현재 시각은 {now.strftime('%Y-%m-%d %H:%M:%S')} 입니다!")
