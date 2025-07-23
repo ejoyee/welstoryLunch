@@ -13,10 +13,17 @@ load_dotenv()
 
 # 웹훅 주소 설정
 MATTERMOST_BASE_URL = "https://meeting.ssafy.com"
-MATTERMOST_WEBHOOK_PATH = "/hooks/웹훅경로"
+# MATTERMOST_WEBHOOK_PATH = "/hooks/웹훅경로"
 
 USERNAME = "웰스토리아이디"
-PASSWORD = "웰스토리비밀번호!"
+PASSWORD = "웰스토리비밀번호"
+
+
+# 한 번에 여러 채널에 보낼 때 사용 (아니라면 주석 처리)
+MATTERMOST_WEBHOOK_PATHS = [
+    "/hooks/채널1경로",  # 이런 식으로 경로 추가
+    "/hooks/채널2경로",       # 이런 식으로 경로 추가
+]
 
 # MATTERMOST_BASE_URL = os.getenv("MATTERMOST_BASE_URL")
 # MATTERMOST_WEBHOOK_PATH = os.getenv("MATTERMOST_WEBHOOK_PATH")
@@ -449,12 +456,22 @@ formatter_map = {
     4: format_menu_message_fri,    # 금요일
 }
 
-def send_to_mattermost(text):
-    payload = { "text": text }
-    webhook_url = f"{MATTERMOST_BASE_URL}{MATTERMOST_WEBHOOK_PATH}"
-    response = requests.post(webhook_url, json=payload)
-    print("전송 상태:", response.status_code)
+# def send_to_mattermost(text):
+#     payload = { "text": text }
+#     webhook_url = f"{MATTERMOST_BASE_URL}{MATTERMOST_WEBHOOK_PATH}"
+#     response = requests.post(webhook_url, json=payload)
+#     print("전송 상태:", response.status_code)
 
+def send_to_multi_mattermost(text):
+    payload = { "text": text }
+
+    for path in MATTERMOST_WEBHOOK_PATHS:
+        webhook_url = f"{MATTERMOST_BASE_URL}{path}"
+        try:
+            response = requests.post(webhook_url, json=payload)
+            print(f"✅ 전송 상태({path}):", response.status_code)
+        except Exception as e:
+            print(f"❌ 전송 실패({path}): {e}")
 
 def job():
 
@@ -468,7 +485,8 @@ def job():
 
         formatter = formatter_map.get(weekday, format_menu_message)
         msg = formatter(menu)
-        send_to_mattermost(msg)
+        # send_to_mattermost(msg)
+        send_to_multi_mattermost(msg)
     else:
         print("로그인 실패")
 
@@ -501,7 +519,7 @@ def main():
     # 평일 오전 12:00 자동 전송
     schedule.every().monday.at("12:00").do(job)
     schedule.every().tuesday.at("12:00").do(job)
-    schedule.every().wednesday.at("12:00").do(job)
+    schedule.every().wednesday.at("12:16").do(job)
     schedule.every().thursday.at("12:00").do(job)
     schedule.every().friday.at("12:00").do(job)
 
